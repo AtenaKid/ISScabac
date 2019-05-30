@@ -140,7 +140,7 @@ function out = ISS(p)
   cRate = Fs/1000/(length(x))/size(Vs,3); out.cRate = cRate;
   
   % Bitrates obtained by different methods
-  methods = {'CABAC' 'GZIP' 'Huffman'};
+  methods = {'CABAC' 'GZIP' };  % 'Huffman' is not available 
   for it=1:length(methods)
     method = methods{it};
     fprintf('Encoding with %s...\n',method)

@@ -23,7 +23,8 @@
   %% Test symbols
   % As a first step, we generate some random Gaussian distributed symbols,
   % which we want to encode
-  symbols = abs(randn(1,param.N));
+  
+  % symbols = abs(randn(1,param.N));        % Org as 
 
   % We use a simple AR(1) model to increase correlation
   rho = 0.8;

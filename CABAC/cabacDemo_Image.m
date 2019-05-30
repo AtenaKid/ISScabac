@@ -4,13 +4,13 @@
 %
 %   Max Bläser, Christian Rohlfing, Yingbo Gao 
 %   (C) 2017 Institut für Nachrichtentechnik, RWTH Aachen University
-
+   close all; 
   rng(0,'twister');
   
   %% Parameter
-  param.N = 10000;
-  param.Nq = 4;
-  param.binMethod = 'DEC2TU';
+  param.N = 512*512;
+  param.Nq = 1;
+  param.binMethod = 'DEC2EG0';
   param.filename = 'test.bin';
   param.disableContexts = 0;
   param.fancyInit = 0;
@@ -23,25 +23,42 @@
   %% Test symbols
   % As a first step, we generate some random Gaussian distributed symbols,
   % which we want to encode
-  symbols = abs(randn(1,param.N));
-
-  % We use a simple AR(1) model to increase correlation
-  rho = 0.8;
-  symbols(2:end) = symbols(2:end)+rho*symbols(1:end-1);
-
+  
+  testImage = 1; 
+  if testImage == 1
+      symbol = (imread('images/lena.bmp')); 
+      symbols = double(symbol(:)./256);  
+  else 
+  %----------- Original sybol generation --------------
+      symbols = abs(randn(1,param.N));        % Org as random number -->  
+      % We use a simple AR(1) model to increase correlation
+      rho = 0.8;
+      symbols(2:end) = symbols(2:end)+rho*symbols(1:end-1);
+  end
 
   %% Quantization
   % We quantize our symbols to integer number with range 0 ... Nq-1
-  q_mt = @(x,Delta,Jmax)(min(floor(x/Delta+0.5),Jmax));     % mid-tread quantizer
-  Delta = quantile(symbols,0.99)/param.Nq;                  % quantization step size
-  symbols = q_mt(symbols,Delta,param.Nq-1);
+%   q_mt = @(x,Delta,Jmax)(min(floor(x/Delta+0.5),Jmax));     % mid-tread quantizer
+%   Delta = quantile(symbols,0.99)/param.Nq;                  % quantization step size
+%   Delta  = 1/256; 
+%   symbols = q_mt(symbols,Delta,param.Nq-1);
 
   
   %% Binarization
   % In the second step, we binarize the symbols using a TU code
+  param.binMethod = 'DEC2EG0';
+  symbol = (imread('images/lena.bmp')); 
+  symbols = double(symbol(:));  
+  
   symbolsC = num2cell(symbols);
   binStringsEncode = cellfun(@(x)cabacBinarizer(x,param.Nq,param.binMethod),symbolsC,'UniformOutput',0);
 
+  
+   % Debinarize the symbols
+%   symbolsDecodedC = cellfun(@(x)cabacDebinarizer(x,param.Nq,param.binMethod), binStringsEncode, 'UniformOutput',0);
+%   symbolsDecoded = cell2mat(symbolsDecodedC);
+%   
+%   imshow(reshape(symbolsDecoded, [512 512]), [])
   
   %% CABAC Initialization
   % Now, we initialize three contexts for coding
@@ -192,3 +209,4 @@
   
   fprintf('CABAC needs %d bits for encoding the test sequence.\n', nbits);
 % end
+imshow(reshape(symbolsDecoded, [512 512]), [])
